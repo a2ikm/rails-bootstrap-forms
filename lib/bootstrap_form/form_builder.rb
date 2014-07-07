@@ -13,11 +13,6 @@ module BootstrapForm
 
     DATE_SELECT_HELPERS = %w{date_select time_select datetime_select}
 
-    WRAPPED_HELPERS = FIELD_HELPERS + DATE_SELECT_HELPERS + %w{
-      file_field select collection_select grouped_collection_select
-      time_zone_select check_box radio_button fields_for
-    }
-
     delegate :content_tag, :capture, :concat, to: :@template
 
     def initialize(object_name, object, template, options)
@@ -166,8 +161,10 @@ module BootstrapForm
       fields_for_without_bootstrap(record_name, record_object, fields_options, &block)
     end
 
-    WRAPPED_HELPERS.each do |method|
-      alias_method_chain method, :bootstrap
+    public_instance_methods(false).each do |method|
+      if m = method.to_s.match(/^([\w_]+)_with_bootstrap/)
+        alias_method_chain m[1], :bootstrap
+      end
     end
 
     private
